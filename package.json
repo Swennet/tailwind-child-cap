@@ -1,0 +1,29 @@
+{
+  "name": "tailwind-child-cap",
+  "version": "1.1.0",
+  "description": "A Tailwind CSS plugin to control the maximum number of visible child elements in a container.",
+  "main": "tailwind-child-cap.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0 || ^4.0.0"
+  },
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "plugin",
+    "layout",
+    "visibility",
+    "children"
+  ],
+  "author": "Swen de Haan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/tailwind-child-cap.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
