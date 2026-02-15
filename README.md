@@ -1,89 +1,109 @@
 # tailwind-child-cap
 
-`tailwind-child-cap` is a Tailwind CSS plugin designed to control the maximum number of visible child elements within a container. This utility is particularly useful for creating responsive designs where the number of displayed elements needs to be adjusted based on the screen size.
+`tailwind-child-cap` is a Tailwind CSS plugin that limits how many direct child elements are visible in a container.
 
 ## Features
 
-- Generates utility classes `.child-cap-{n}` to specify the number of visible child elements.
-- Provides `.child-cap-none` to display all child elements, overriding previous cap settings.
-- Fully responsive, allowing different caps at different breakpoints.
+- Generates `.child-cap-1` to `.child-cap-N` utilities
+- Includes `.child-cap-none` to remove the cap
+- Works with responsive variants (`sm:`, `md:`, `lg:`, and so on)
 
 ## Installation
 
-Install the plugin via npm:
-
 ```bash
-npm install -D tailwind-child-cap
+npm install --save-dev tailwind-child-cap
 ```
 
-## Usage
+## Usage with Tailwind 4 (`app.css`)
 
-Add `tailwind-child-cap` to your Tailwind CSS configuration file (`tailwind.config.js`):
+```css
+@import "tailwindcss";
 
-```javascript
-// tailwind.config.js
+@plugin "tailwind-child-cap";
+```
+
+Custom range:
+
+```css
+@import "tailwindcss";
+
+@plugin "tailwind-child-cap" {
+    maxrange: 42;
+}
+```
+
+## Usage with `tailwind.config.js`
+
+```js
 module.exports = {
-  // ...
-  plugins: [
-    require("tailwind-child-cap"),
-    // ... other plugins
-  ],
+  plugins: [require("tailwind-child-cap")({ maxRange: 30 })],
 };
 ```
 
-Optionally, you can customize the maximum range of the child-cap classes:
+## Options
 
-```javascript
-// tailwind.config.js
-module.exports = {
-  // ...
-  plugins: [
-    require("tailwind-child-cap")({ maxRange: 30 }),
-    // ...
-  ],
-};
-```
+Use `maxRange` in JavaScript config or `maxrange` in the Tailwind 4 `@plugin` block.
+
+- Type: positive integer
+- Default: `24`
+- Invalid values (non-number, `0`, negative) fall back to `24`
 
 ## Examples
 
-### Basic Usage
+### Basic usage
 
 ```html
-<div class="child-cap-3">
-  <div class="item">Item 1</div>
-  <div class="item">Item 2</div>
-  <div class="item">Item 3</div>
-  <div class="item">Item 4</div>
-  <!-- Hidden -->
-</div>
+<ul class="child-cap-3">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <!-- Hidden from here -->
+  <li>Item 4</li>
+  <li>Item 5</li>
+</ul>
 ```
 
-In this example, only the first three child elements will be visible.
+In this example, only the first three child elements are visible.
 
-### Responsive Design
+### Responsive design
 
 ```html
-<div class="child-cap-2 md:child-cap-4 lg:child-cap-6">
-  <!-- Child elements here -->
-</div>
+<ul class="child-cap-2 md:child-cap-4 lg:child-cap-6">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <!-- Hidden until md -->
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <!-- Hidden until lg -->
+  <li>Item 5</li>
+  <li>Item 6</li>
+  <!-- Hidden at all breakpoints -->
+  <li>Item 7</li>
+</ul>
 ```
 
-This setup displays 2 child elements by default, 4 on medium screens, and 6 on large screens.
+This setup shows 2 items by default, 4 on `md`, and 6 on `lg`.
 
-### Removing the Cap
+### Removing the cap
 
 ```html
-<div class="md:child-cap-3 lg:child-cap-none">
-  <!-- Child elements here -->
-</div>
+<ul class="md:child-cap-3 lg:child-cap-none">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <!-- Hidden on md, visible again on lg -->
+  <li>Item 4</li>
+  <li>Item 5</li>
+</ul>
 ```
 
-This configuration caps the children to 3 on medium screens and removes the cap on large screens, displaying all children.
+On medium screens this caps at 3 items, and on large screens the cap is removed.
 
-## Contributing
+## Compatibility
 
-Contributions to `tailwind-child-cap` are welcome! Feel free to submit issues or pull requests on GitHub for any bugs, improvements, or new features.
+- Tailwind CSS: `^4.0.0`
+- Node.js: `>=14`
 
 ## License
 
-This plugin is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+MIT, see [LICENSE](LICENSE).
