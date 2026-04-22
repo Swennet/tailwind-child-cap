@@ -34,9 +34,9 @@ function createUtilities(maxRange) {
         utilities[`.child-cap-${i}`] = {
             "& > *": {
                 display: "none",
-                [`&:nth-child(-n+${i})`]: {
-                    display: "block",
-                },
+            },
+            [`& > :where(:nth-child(-n+${i}))`]: {
+                display: "block",
             },
         };
     }

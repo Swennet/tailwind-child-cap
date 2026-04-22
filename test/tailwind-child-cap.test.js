@@ -15,6 +15,75 @@ function runPlugin(options) {
     return output;
 }
 
+function flattenUtilityRules(utility) {
+    const rules = [];
+
+    for (const [selector, declarations] of Object.entries(utility)) {
+        if (declarations.display) {
+            rules.push({selector, display: declarations.display});
+        }
+
+        for (const [nestedSelector, nestedDeclarations] of Object.entries(declarations)) {
+            if (
+                nestedSelector === "display" ||
+                !nestedDeclarations ||
+                typeof nestedDeclarations !== "object"
+            ) {
+                continue;
+            }
+
+            if (nestedDeclarations.display) {
+                rules.push({
+                    selector: selector + nestedSelector.replace(/^&/, ""),
+                    display: nestedDeclarations.display,
+                });
+            }
+        }
+    }
+
+    return rules;
+}
+
+function selectorMatchesChild(selector, childNumber) {
+    if (selector === "& > *") {
+        return true;
+    }
+
+    const match = selector.match(/:nth-child\(-n\+(\d+)\)/);
+
+    return match ? childNumber <= Number.parseInt(match[1], 10) : false;
+}
+
+function selectorSpecificity(selector) {
+    return selector.replace(/:where\([^)]*\)/g, "").includes(":nth-child(") ? 1 : 0;
+}
+
+function resolveChildDisplay(utilities, classNames, childNumber) {
+    let winner = {display: "block", order: -1, specificity: -1};
+    let order = 0;
+
+    for (const className of classNames) {
+        for (const rule of flattenUtilityRules(utilities[className])) {
+            order += 1;
+
+            if (!selectorMatchesChild(rule.selector, childNumber)) {
+                continue;
+            }
+
+            const specificity = selectorSpecificity(rule.selector);
+
+            if (
+                specificity > winner.specificity ||
+                (specificity === winner.specificity && order > winner.order)
+            ) {
+                winner = {display: rule.display, order, specificity};
+            }
+        }
+    }
+
+    return winner.display;
+}
+
 const tests = [
     [
         "resolveMaxRange uses defaults and supports key aliases",
@@ -49,12 +118,37 @@ const tests = [
             assert.ok(utilities[".child-cap-1"]);
             assert.ok(utilities[".child-cap-2"]);
             assert.ok(utilities[".child-cap-3"]);
+            assert.equal(utilities[".child-cap-2"]["& > *"].display, "none");
             assert.equal(
-                utilities[".child-cap-2"]["& > *"]["&:nth-child(-n+2)"].display,
+                utilities[".child-cap-2"]["& > :where(:nth-child(-n+2))"].display,
                 "block",
             );
             assert.equal(utilities[".child-cap-none"]["& > *"].display, "block");
             assert.equal(Object.keys(utilities).length, 4);
+        },
+    ],
+    [
+        "later smaller caps override earlier larger caps",
+        () => {
+            const {createUtilities} = childCapPlugin._private;
+            const utilities = createUtilities(12);
+            const classNames = [".child-cap-12", ".child-cap-10"];
+
+            assert.equal(resolveChildDisplay(utilities, classNames, 10), "block");
+            assert.equal(resolveChildDisplay(utilities, classNames, 11), "none");
+            assert.equal(resolveChildDisplay(utilities, classNames, 12), "none");
+        },
+    ],
+    [
+        "child-cap-none removes an earlier cap",
+        () => {
+            const {createUtilities} = childCapPlugin._private;
+            const utilities = createUtilities(12);
+            const classNames = [".child-cap-10", ".child-cap-none"];
+
+            assert.equal(resolveChildDisplay(utilities, classNames, 10), "block");
+            assert.equal(resolveChildDisplay(utilities, classNames, 11), "block");
+            assert.equal(resolveChildDisplay(utilities, classNames, 12), "block");
         },
     ],
     [
