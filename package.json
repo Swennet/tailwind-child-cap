@@ -1,6 +1,6 @@
 {
   "name": "tailwind-child-cap",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A Tailwind CSS plugin to control the maximum number of visible child elements in a container.",
   "main": "tailwind-child-cap.js",
   "exports": {
